@@ -35,7 +35,7 @@ SEASONS = ["Winter", "Spring", "Summer", "Fall"]
 #</COMMON_DATA>
 
 #<COMMON_CODE>
-DEBUG = True
+DEBUG = False
 from soluzion5 import Basic_State, \
   Basic_Operator as Operator, ROLES_List, add_to_next_transition
 import Select_Roles as sr
@@ -179,28 +179,29 @@ class State(Basic_State):
 
     def __str__(self):
         season = SEASONS[self.season_index]
-        return (f"=== CITY WITHOUT WALLS - Turn {self.turn} ({season}) ===\n"
-                f"Current Player: {self.current_role}\n\n"
-                f"CITYWIDE METRICS:\n"
-                f"Total Homeless: {self.homeless_population} (Goal: 9,095)\n"
-                f"  - Unsheltered: {self.unsheltered}\n"
-                f"  - Sheltered: {self.sheltered}\n"
-                f"  - Transitional: {self.transitional}\n"
-                f"At-Risk Population: {self.at_risk_population}\n"
-                f"Public Support: {self.public_support}%\n"
-                f"Trust Index: {self.trust_index}/100\n"
-                f"Service Coordination: {self.service_coordination}%\n\n"
-                f"STAKEHOLDER STATUS:\n"
-                f"Neighborhoods: ${self.neigh_budget:,} budget, {self.neigh_influence} influence\n"
-                f"  Property Values: {self.property_value_index}, Safety: {self.safety_perception}\n"
-                f"Business: ${self.biz_budget:,} budget, {self.biz_influence} influence\n"
-                f"  Traffic: {self.customer_traffic}, Cleanliness: {self.cleanliness_index}\n"
-                f"Medical: ${self.med_budget:,} budget, {self.med_influence} influence\n"
-                f"  Health Index: {self.health_outcome_index}, Burnout: {self.staff_burnout}%\n"
-                f"Shelters: ${self.shelter_budget:,} budget, {self.shelter_influence} influence\n"
-                f"  Beds: {self.bed_capacity}, Waitlist: {self.waitlist}\n"
-                f"University: ${self.uni_budget:,} budget, {self.uni_influence} influence\n"
-                f"  Reputation: {self.reputation_score}, Engagement: {self.community_engagement}\n")
+        txt = f"=== CITY WITHOUT WALLS - Turn {self.turn} ({season}) ===\n"
+        txt += f"Current Player: {self.current_role}\n\n"
+        txt += f"CITYWIDE METRICS:\n"
+        txt += f"Total Homeless: {self.homeless_population} (Goal: 9,095)\n"
+        txt += f"  - Unsheltered: {self.unsheltered}\n"
+        txt += f"  - Sheltered: {self.sheltered}\n"
+        txt += f"  - Transitional: {self.transitional}\n"
+        txt += f"At-Risk Population: {self.at_risk_population}\n"
+        txt += f"Public Support: {self.public_support}%\n"
+        txt += f"Trust Index: {self.trust_index}/100\n"
+        txt += f"Service Coordination: {self.service_coordination}%\n\n"
+        txt += f"STAKEHOLDER STATUS:\n"
+        txt += f"Neighborhoods: ${self.neigh_budget:,} budget, {self.neigh_influence} influence\n"
+        txt += f"  Property Values: {self.property_value_index}, Safety: {self.safety_perception}\n"
+        txt += f"Business: ${self.biz_budget:,} budget, {self.biz_influence} influence\n"
+        txt += f"  Traffic: {self.customer_traffic}, Cleanliness: {self.cleanliness_index}\n"
+        txt += f"Medical: ${self.med_budget:,} budget, {self.med_influence} influence\n"
+        txt += f"  Health Index: {self.health_outcome_index}, Burnout: {self.staff_burnout}%\n"
+        txt += f"Shelters: ${self.shelter_budget:,} budget, {self.shelter_influence} influence\n"
+        txt += f"  Beds: {self.bed_capacity}, Waitlist: {self.waitlist}\n"
+        txt += f"University: ${self.uni_budget:,} budget, {self.uni_influence} influence\n"
+        txt += f"  Reputation: {self.reputation_score}, Engagement: {self.community_engagement}\n"
+        return txt
 
     def __eq__(self, s):
         return self.__str__() == s.__str__()
@@ -339,20 +340,26 @@ def next_player(k):
     elif k == SHELTERS: return UNIVERSITY
     else: return NEIGHBORHOODS
 
+def whose_move(state):
+    '''Returns whose move it is (required by some SOLUZION5 versions)'''
+    return state.whose_turn
+
+def describe_move(old_state, new_state):
+    '''Describe what happened in this move (for transition messages)'''
+    role_name = int_to_name(old_state.whose_turn)
+    return f"{role_name} completed their action. Now it's {int_to_name(new_state.whose_turn)}'s turn."
+
 def update_turn(news):
     # Apply decay effects
     if not news.last_positive_action:
         news.public_support = clamp(news.public_support - 1, 0, 100)
     
-    # Update season every 3 turns
-    if news.turn % 3 == 0:
-        news.season_index = (news.season_index + 1) % 4
-    
-    # Seasonal effects
+    # Seasonal effects - only apply when changing players within same round
     apply_seasonal_effects(news)
     
-    # Volunteer attrition
-    if news.turn % 4 == 0:
+    # Volunteer attrition - check every 4 player turns
+    turn_count = (news.turn - 1) * 5 + (news.whose_turn + 1)
+    if turn_count % 4 == 0:
         news.volunteer_count = int(news.volunteer_count * 0.95)
     
     # Staff burnout increase if overworked
@@ -365,10 +372,13 @@ def update_turn(news):
     news.current_role_num = updated
     news.current_role = NAMES[updated]
     
-    # Every full round (5 turns), increment turn counter
+    # Every full round (5 turns), increment turn counter and update season
     if updated == NEIGHBORHOODS:
         news.turn += 1
         news.last_positive_action = False
+        # Update season every 3 rounds
+        if news.turn % 3 == 0:
+            news.season_index = (news.season_index + 1) % 4
 
 def apply_seasonal_effects(s):
     season = SEASONS[s.season_index]
@@ -989,74 +999,118 @@ def develop_data_dashboard(s):
 
 # Neighborhoods
 def can_media_campaign(s):
-    return s.whose_turn == NEIGHBORHOODS and s.neigh_budget >= 100000 and s.public_support < 70
+    if s.whose_turn != NEIGHBORHOODS:
+        return False
+    return s.neigh_budget >= 100000 and s.public_support < 70
 
 def can_private_security(s):
-    return s.whose_turn == NEIGHBORHOODS and s.neigh_budget >= 75000 and s.safety_perception < 55
+    if s.whose_turn != NEIGHBORHOODS:
+        return False
+    return s.neigh_budget >= 75000 and s.safety_perception < 55
 
 def can_outreach_program(s):
-    return s.whose_turn == NEIGHBORHOODS and s.neigh_budget >= 60000 and s.public_support > 45
+    if s.whose_turn != NEIGHBORHOODS:
+        return False
+    return s.neigh_budget >= 60000 and s.public_support > 45
 
 def can_community_forums(s):
-    return s.whose_turn == NEIGHBORHOODS and s.neigh_budget >= 15000 and s.complaint_rate > 20
+    if s.whose_turn != NEIGHBORHOODS:
+        return False
+    return s.neigh_budget >= 15000 and s.complaint_rate > 20
 
 # Business
 def can_city_sweeps(s):
-    return s.whose_turn == BUSINESS and s.biz_budget >= 120000 and s.cleanliness_index < 60
+    if s.whose_turn != BUSINESS:
+        return False
+    return s.biz_budget >= 120000 and s.cleanliness_index < 60
 
 def can_job_readiness(s):
-    return s.whose_turn == BUSINESS and s.biz_budget >= 180000 and s.turn > 3
+    if s.whose_turn != BUSINESS:
+        return False
+    return s.biz_budget >= 180000 and s.turn > 3
 
 def can_street_ambassadors(s):
-    return s.whose_turn == BUSINESS and s.biz_budget >= 90000 and s.biz_reputation > 40
+    if s.whose_turn != BUSINESS:
+        return False
+    return s.biz_budget >= 90000 and s.biz_reputation > 40
 
 def can_affordable_housing(s):
-    return s.whose_turn == BUSINESS and s.biz_budget >= 350000 and s.turn > 8
+    if s.whose_turn != BUSINESS:
+        return False
+    return s.biz_budget >= 350000 and s.turn > 8
 
 # Medical
 def can_health_clinic(s):
-    return s.whose_turn == MEDICAL and s.med_budget >= 200000 and s.turn > 2
+    if s.whose_turn != MEDICAL:
+        return False
+    return s.med_budget >= 200000 and s.turn > 2
 
 def can_mental_health(s):
-    return s.whose_turn == MEDICAL and s.med_budget >= 280000 and s.turn > 4
+    if s.whose_turn != MEDICAL:
+        return False
+    return s.med_budget >= 280000 and s.turn > 4
 
 def can_medical_respite(s):
-    return s.whose_turn == MEDICAL and s.med_budget >= 160000
+    if s.whose_turn != MEDICAL:
+        return False
+    return s.med_budget >= 160000
 
 def can_mobile_outreach(s):
-    return s.whose_turn == MEDICAL and s.med_budget >= 95000 and s.turn > 2
+    if s.whose_turn != MEDICAL:
+        return False
+    return s.med_budget >= 95000 and s.turn > 2
 
 # Shelters
 def can_volunteer_drive(s):
-    return s.whose_turn == SHELTERS and s.shelter_budget >= 50000 and s.public_support > 45
+    if s.whose_turn != SHELTERS:
+        return False
+    return s.shelter_budget >= 50000 and s.public_support > 45
 
 def can_expand_shelter(s):
-    return s.whose_turn == SHELTERS and s.shelter_budget >= 150000
+    if s.whose_turn != SHELTERS:
+        return False
+    return s.shelter_budget >= 150000
 
 def can_housing_navigation(s):
-    return s.whose_turn == SHELTERS and s.shelter_budget >= 120000 and s.turn > 3
+    if s.whose_turn != SHELTERS:
+        return False
+    return s.shelter_budget >= 120000 and s.turn > 3
 
 def can_establish_psh(s):
-    return s.whose_turn == SHELTERS and s.shelter_budget >= 400000 and s.turn > 10 and s.service_coordination > 50
+    if s.whose_turn != SHELTERS:
+        return False
+    return s.shelter_budget >= 400000 and s.turn > 10 and s.service_coordination > 50
 
 def can_research_partner(s):
-    return s.whose_turn == SHELTERS and s.shelter_budget >= 75000 and s.turn > 5
+    if s.whose_turn != SHELTERS:
+        return False
+    return s.shelter_budget >= 75000 and s.turn > 5
 
 # University
 def can_student_outreach(s):
-    return s.whose_turn == UNIVERSITY and s.uni_budget >= 40000 and s.turn % 12 not in [0, 11, 12, 23, 24]
+    if s.whose_turn != UNIVERSITY:
+        return False
+    return s.uni_budget >= 40000 and s.turn % 12 not in [0, 11, 12, 23, 24]
 
 def can_policy_research(s):
-    return s.whose_turn == UNIVERSITY and s.uni_budget >= 90000 and s.turn > 4
+    if s.whose_turn != UNIVERSITY:
+        return False
+    return s.uni_budget >= 90000 and s.turn > 4
 
 def can_pilot_program(s):
-    return s.whose_turn == UNIVERSITY and s.uni_budget >= 150000 and s.research_funding >= 150000 and s.turn > 6 and not s.pilot_active
+    if s.whose_turn != UNIVERSITY:
+        return False
+    return s.uni_budget >= 150000 and s.research_funding >= 150000 and s.turn > 6 and not s.pilot_active
 
 def can_academic_forums(s):
-    return s.whose_turn == UNIVERSITY and s.uni_budget >= 25000 and s.community_engagement < 60
+    if s.whose_turn != UNIVERSITY:
+        return False
+    return s.uni_budget >= 25000 and s.community_engagement < 60
 
 def can_data_dashboard(s):
-    return s.whose_turn == UNIVERSITY and s.uni_budget >= 60000 and s.turn > 8
+    if s.whose_turn != UNIVERSITY:
+        return False
+    return s.uni_budget >= 60000 and s.turn > 8
 
 #------------------
 #<OPERATORS>
@@ -1167,4 +1221,10 @@ ROLES = [
 BRIFL_SVG = False
 render_state = None
 DEBUG_VIS = True
+
+def use_BRIFL_SVG():
+    """Initialize SVG rendering (not implemented for this game)"""
+    global BRIFL_SVG
+    BRIFL_SVG = False
+    return False
 #</STATE_VIS>
