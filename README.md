@@ -1,5 +1,6 @@
 # City Without Walls: How to Play
 
+<img width="1024" height="1024" alt="ChatGPT Image Dec 10, 2025, 05_34_20 PM" src="https://github.com/user-attachments/assets/c6779db2-02ad-4674-b0bc-75c57b4bf6ef" />
 
 City Without Walls is a turn-based, multi-stakeholder strategy simulation where **five competing interest groups** attempt to influence city policy on homelessness. The game models the real-world complexity of homelessness as a **wicked problem**—full of uncertainty, unintended consequences, political pressure, resource constraints, and conflicting incentives.
 
