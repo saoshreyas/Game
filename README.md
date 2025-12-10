@@ -1,350 +1,340 @@
-City Without Walls: README
-Overview
+# City Without Walls: How to Play
 
-City Without Walls is a turn-based, multi-stakeholder strategy simulation about homelessness in a midsized American city. It reflects the real-world complexity, uncertainty, and political trade-offs inherent to addressing homelessness. Inspired by the concept of wicked problems, the game integrates economic pressures, public sentiment, institutional incentives, and competing stakeholder agendas.
 
-This README serves both players and developers. The first half explains how to understand and play the game. The second half explains how the game works under the hood, including its architecture, state variables, operator structure, and turn logic.
+City Without Walls is a turn-based, multi-stakeholder strategy simulation where **five competing interest groups** attempt to influence city policy on homelessness. The game models the real-world complexity of homelessness as a **wicked problem**—full of uncertainty, unintended consequences, political pressure, resource constraints, and conflicting incentives.
 
-PART I — PLAYER-FRIENDLY GUIDE
-1. Setting
+Players take turns executing actions that alter interconnected metrics such as Public Support, Homeless Population, Legal Pressure, Budget Levels, Stakeholder Reputation, and Infrastructure Capacity. Progress requires navigating political trade-offs, unpredictable outcomes, and a fragile urban ecosystem.
 
-You are part of a dynamic, politically tense city attempting to solve the wicked problem of homelessness. Public outcry has generated momentum for change, but stakeholders disagree sharply on what ‘change’ means.
+---
 
-The city:
+# Game Overview
 
-Population: 750,000 (metro: 2.2M)
+City Without Walls places you in a midsized American city facing a homelessness crisis after a violent incident sparks political upheaval. Five powerful stakeholders now compete to shape the city’s response.
 
-People experiencing homelessness: 10,700
+Each player controls one stakeholder group:
 
-Rent burden extremely high; public frustration rising
+* **Neighborhood Coalitions**
+* **Business District Alliance**
+* **Medical Quarter Leadership**
+* **Shelters & Service Providers**
+* **University / Research Consortium**
 
-Major zones include business districts, neighborhoods, medical quarter, shelters, university, and grey zones
+All groups **want homelessness reduced**, but each also protects its own interests—budget, reputation, influence, or stability.
 
-You take on one of five roles, each representing a powerful stakeholder with their own incentives and tools:
+To win, the *city* must achieve:
 
-Neighborhood Coalitions
+* **30% reduction** in homelessness
+* **Public Support ≥ 50%**
+* **Legal Pressure < 20**
 
-Business District Alliance
+Failure to maintain political or social stability can lead to collapse.
 
-Medical Quarter Leadership
+---
 
-Shelters & Service Providers
+# Core Metrics
 
-University / Research Institution
+Your actions influence a dynamic system of interdependent metrics:
 
-Each role wants homelessness reduced — but also wants to protect their own reputation, budget, and interests.
+### **Homelessness Metrics**
 
-2. Game Objective
+* **Total Homeless Population**
+* **Unsheltered Population**
+* **Sheltered Population**
+* **At-Risk Population** (those at imminent risk of homelessness)
 
-The city’s crisis is too large for any one group. You must collectively (and competitively) influence the system so that:
+### **Citywide Metrics**
 
-Homelessness decreases by 30%
+* **Public Support**
+* **Legal Pressure**
+* **Policy Fatigue** (public resistance to frequent spending/changes)
+* **Policy Momentum** (city’s readiness to adopt new programs)
+* **Economy Strength** (affects budget inflow)
 
-Public Support stays above 50%
+### **Infrastructure Metrics**
 
-Legal Pressure stays below 20
+* **Bed Capacity**
+* **Construction Queue** (multi-turn projects)
 
-You win if the city achieves these simultaneously.
+### **Stakeholder Metrics**
 
-You lose if:
+Each role has its own:
 
-Public Support collapses
+* **Budget**
+* **Reputation / Influence**
+* **Role-Specific Variables** (e.g., Property Values, Customer Traffic, Clinic Capacity, Volunteer Count, University Reputation)
 
-Legal Pressure triggers lawsuits or federal takeover
+---
 
-Homelessness significantly rises due to poor decisions
+# Roles and Objectives
 
-3. Turn Order
+Each stakeholder has unique actions, incentives, and loss risks.
 
-Each turn:
+---
 
-A stakeholder acts.
+# Neighborhood Coalitions
 
-Their operator triggers changes in the city state.
+### **Primary Goal:** Reduce visible street homelessness while protecting property values and safety.
 
-Background systems (economy, construction, fatigue, budget flows) update.
+### **Secondary Goals:** Maintain high public support, minimize legal conflicts, protect neighborhood reputation.
 
-Next stakeholder takes a turn.
+### **Lose Conditions to Avoid:**
 
-Order is semi-random at game start, but stabilizes based on political influence.
+* Public Support falls below 35%
+* Neighborhood safety perception collapses
+* Excessive use of punitive actions increases legal pressure
 
-4. What Players Can Do (Operators)
+---
 
-Operators are policy actions. Each role has exclusive access to certain operators.
+## Neighborhood Actions & Strategy
 
-Examples:
+### **Launch Media Campaign (Cost: Budget)**
 
-Neighborhoods
+**Effects:** Boosts public support, slightly reduces visible homelessness.
+**Strategy:** Powerful political tool. Helps guide city-wide attitudes and influence other stakeholders indirectly.
 
-Launch Media Campaign
+### **Fund Private Security (Cost: Moderate)**
 
-Fund Private Security
+**Effects:** Reduces local homelessness but **pushes unsheltered individuals into other zones**.
+**Strategy:** Effective but risky—can backfire by increasing chronic homelessness citywide.
 
-Sponsor Local Outreach
+### **Sponsor Local Outreach (Cost: Low)**
 
-Business District
+**Effects:** Improves public sentiment and slightly reduces unsheltered count.
+**Strategy:** Good long-term trust-building alternative to punitive approaches.
 
-Partner on Sanitation Sweeps
+### **Pass**
 
-Run Job Readiness Programs
+**Effects:** Public support drops.
+**Strategy:** Dangerous; avoid when possible.
 
-Deploy Street Ambassadors
+---
 
-Medical Quarter
+# Business District Alliance
 
-Open Health Clinics
+### **Primary Goal:** Keep streets clean, maintain customer flow, and avoid economic decline.
 
-Expand Mental Health Services
+### **Secondary Goals:** Reduce visible homelessness around businesses, improve cleanliness index.
 
-Mobile Medical Teams
+### **Lose Conditions to Avoid:**
 
-Shelters & Services
+* Customer traffic falls too low
+* Cleanliness index collapses
+* Reputation damage from aggressive actions
 
-Volunteer Drives
+---
 
-Expand Bed Capacity
+## Business District Actions & Strategy
 
-Partner with Medical or University actors
+### **Sanitation & Encampment Sweeps (Cost: Moderate)**
 
-University
+**Effects:** Clears streets temporarily; increases legal pressure; may worsen chronic homelessness.
+**Strategy:** High-impact but risky—should be timed carefully.
 
-Conduct Research Studies
+### **Job Readiness Programs (Cost: Medium)**
 
-Run Pilot Projects with City
+**Effects:** Reduces at-risk population and improves public support.
+**Strategy:** Balanced action that supports stability without backlash.
 
-Reputation Management Operations
+### **Deploy Street Ambassadors (Cost: Low)**
 
-Each operator affects:
+**Effects:** Guides unhoused individuals to shelters; increases sheltered population.
+**Strategy:** Gentle, trust-building approach.
 
-Public Support
+### **Pass**
 
-Homeless Population (sheltered/unsheltered)
+**Effects:** Cleanliness index worsens.
 
-Budgets
+---
 
-Institutional variables
+# Medical Quarter Leadership
 
-Construction pipeline (if relevant)
+### **Primary Goal:** Improve health outcomes and reduce ER strain.
 
-Stakeholder reputation
+### **Secondary Goals:** Maintain clinic capacity, manage treatment costs.
 
-Policy momentum or fatigue
+### **Lose Conditions to Avoid:**
 
-Not all operators help — punitive ones may backfire and increase chronic homelessness.
+* Clinic overload
+* Treatment costs exceeding budget
 
-5. Difficulty & Realism Features
+---
 
-The game is intentionally challenging.
+## Medical Quarter Actions & Strategy
 
-Uncertainty:
+### **Open Health Clinics (Cost: High)**
 
-Actions can succeed, partially succeed, or fail.
+**Effects:** Improves health outcomes and reduces long-term homelessness.
+**Strategy:** Expensive but essential for addressing root causes.
 
-Construction delays:
+### **Expand Mental Health Services (Cost: Medium-High)**
 
-New housing takes multiple rounds to complete.
+**Effects:** Reduces chronic homelessness over time.
+**Strategy:** High long-term impact; helps stabilize the system.
 
-Operating costs:
+### **Mobile Medical Teams (Cost: Low-Medium)**
 
-Shelters deteriorate if underfunded.
+**Effects:** Reduces unsheltered deaths and improves stability.
+**Strategy:** Good emergency tool.
 
-Economic volatility:
+### **Pass**
 
-Random events like recessions or booms affect budget and support.
+**Effects:** Patient volume worsens.
 
-Policy fatigue:
+---
 
-The public grows tired of expensive or repeated interventions.
+# Shelters & Service Providers
 
-Role interdependence:
+### **Primary Goal:** Increase capacity and connect people to services.
 
-No stakeholder can win alone; competing but coordinated strategies are required.
+### **Secondary Goals:** Maintain volunteer count, avoid collapse of shelter systems.
 
-PART II — DEVELOPER GUIDE
-6. Code Architecture
+### **Lose Conditions to Avoid:**
 
-The game is built using an object-oriented Python framework structured around:
+* Bed capacity falls below minimum needs
+* Operating budget depleted
 
-State class
+---
 
-Operator classes
+## Shelters & Services Actions & Strategy
 
-Role definitions
+### **Volunteer Drive (Cost: Low)**
 
-Turn engine
+**Effects:** Boosts volunteer count and reduces homelessness slightly.
+**Strategy:** Staple action—cheap and reliable.
 
-Random event & background systems
+### **Expand Bed Capacity (Cost: High + construction delay)**
 
-SVG visualizer (separate file)
+**Effects:** Increases capacity but takes multiple turns.
+**Strategy:** Crucial for long-term success. Requires coordination.
 
-7. State Variables
+### **Partner with Medical or University (Cost: Varies)**
 
-The State object tracks all dynamic information:
+**Effects:** Unlocks shared benefits, improves outcomes.
+**Strategy:** Collaboration yields compounding advantages.
 
-Global Metrics
+### **Pass**
 
-homeless_total
+**Effects:** Capacity wears down.
 
-unsheltered
+---
 
-sheltered
+# University / Research Consortium
 
-at_risk_population
+### **Primary Goal:** Improve research impact while maintaining reputation.
 
-public_support
+### **Secondary Goals:** Increase community engagement, avoid political backlash.
 
-legal_pressure
+### **Lose Conditions to Avoid:**
 
-policy_fatigue
+* Reputation drops too low
+* Research becomes politically risky
 
-economy_strength
+---
 
-policy_momentum
+## University Actions & Strategy
 
-Budgets
+### **Student Outreach & Research Initiative (Cost: Low)**
 
-Individual budgets for:
+**Effects:** Improves data accuracy, small public support gain.
+**Strategy:** Low-risk, high-information play.
 
-Neighborhoods
+### **Pilot Programs with City (Cost: Medium)**
 
-Business District
+**Effects:** Medium homelessness reduction; may cause controversy if outcomes poor.
+**Strategy:** Strong but reputation-sensitive.
 
-Medical Quarter
+### **Reputation Management (Cost: Medium)**
 
-Shelters/Services
+**Effects:** Mitigates damage from failed studies.
+**Strategy:** Use after risky or controversial actions.
 
-University
+### **Pass**
 
-Infrastructure
+**Effects:** Reputation drops.
 
-bed_capacity
+---
 
-construction_queue (multi-turn projects)
+# Key Game Mechanics
 
-Role Rotation
+## Turn Structure
 
-Current role
+* Turn order is determined by political influence.
+* Each turn, exactly one stakeholder acts.
+* Background systems update automatically.
+* Random events and economic shocks may occur.
+* Game continues until victory or collapse.
 
-Turn counter
+## Construction Pipeline
 
-Political influence weights
+* Capacity expansions take multiple turns.
+* Projects appear in a construction queue.
 
-8. Operators (Technical Overview)
+## Operating Costs
 
-Each operator is an object with:
+* Shelters incur ongoing costs.
+* Failing to pay leads to capacity degradation.
 
-name
+## Policy Fatigue
 
-precondition(state, role) → bool
+* Repeated spending reduces public willingness for more initiatives.
 
-apply(state) → modifies state
+## Random Events
 
-Cost helpers: partial spending, dynamic scaling
+Possible events include:
 
-Failure/partial-success probabilities
+* Economic recession
+* Budget surplus
+* Severe weather
+* Public protests
 
-Risk levels / unintended consequences
+---
 
-Operators are grouped by role and stored in an operator registry.
+# Advanced Strategic Considerations
 
-9. Turn Logic
+### **Cross-Role Synergy**
 
-Each turn:
+* Business + Shelters = outreach + job programs synergy
+* Medical + University = research-informed health initiatives
+* Neighborhoods + Business = public support + visibility reduction
 
-Select Role based on influence mapping.
+### **Managing Unintended Consequences**
 
-Get Available Operators (check preconditions).
+Punitive approaches may:
 
-Player Chooses Operator.
+* Increase chronic homelessness
+* Raise legal pressure
+* Lower public support
 
-Operator Executes with realistic randomness.
+### **Economic Timing**
 
-Construction Queue Updates.
+Major actions should align with:
 
-Budgets Adjust (inflows, grants, economic effect).
+* Budget surpluses
+* High policy momentum
 
-Policy Fatigue and Momentum Update.
+### **Political Pressure**
 
-Win/Loss Conditions Checked.
+Maintaining public support is essential for preventing citywide collapse.
 
-10. Background Systems
+---
 
-These systems activate automatically each turn:
+# Real-World Context
 
-Construction Pipeline
+City Without Walls reflects empirical realities of homelessness:
 
-Reduces remaining time on housing projects; adds capacity when done.
+* Housing-first research
+* Impacts of criminalization
+* Role of medical respite care
+* Research ethics and reputation
+* Urban economic pressures
 
-Operating Cost Deduction
+The game’s complexity mirrors real policymaking: intertwined, uncertain, and politically constrained.
 
-Shelters require upkeep; shortages degrade capacity.
+---
 
-Random Events
+If you'd like, I can also add:
 
-Recessions
-
-Booms
-
-Weather events
-
-Political scandals
-
-Chronic Homelessness Drift
-
-Punitive strategies can increase chronic homelessness long-term.
-
-11. Visualization
-
-A separate Python file generates an SVG dashboard showing:
-
-Current homelessness breakdown
-
-Budget bars
-
-Public support gauge
-
-Legal pressure gauge
-
-Construction progress timers
-
-Turn and role indicators
-
-This file reads from the State object and exports updated visuals each turn.
-
-12. Extending the Game
-
-Developers can add:
-
-New roles
-
-Additional operators
-
-Deeper economic modeling
-
-AI-controlled stakeholders
-
-Narrative events
-
-Adding a new operator requires only:
-
-Writing a new class instance
-
-Defining cost, effects, preconditions
-
-Registering it under a role
-
-The engine handles the rest.
-
-13. Credits
-
-Concept, research, and specifications by Shreyas and Lauren.
-
-Development includes:
-
-Wicked problem analysis
-
-Stakeholder modeling
-
-Policy simulation logic
-
-Turn-based systems
+* Visual examples
+* A shorter “Quick Start Guide”
+* A printable PDF version
+* Per-role strategy cheat sheets
